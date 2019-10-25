@@ -152,11 +152,14 @@ main(int argc, char* argv[])
     check_rv(fd);
 
     // void* file = malloc(1024); // TODO: load the file with mmap.
-    void* file = mmap(0, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    (void) file; // suppress unused warning.
+    void* tmp = mmap(0, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    (void) tmp; // suppress unused warning.
+    long count = *((long*)tmp);
+    munmap(tmp, 4096);
 
+    void* file = mmap(0, count * sizeof(float), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    (void) file;
     // TODO: These should probably be from the input file.
-    long count = *((long*)file);
     float* data = (float*)(file + sizeof(long));
 
     long sizes_bytes = P * sizeof(long);
@@ -171,7 +174,7 @@ main(int argc, char* argv[])
     free_barrier(bb);
 
     // TODO: munmap your mmaps
-    munmap(file, 4096);
+    munmap(file, count * sizeof(float));
     munmap(sizes, sizes_bytes);
 
     return 0;
