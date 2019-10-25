@@ -23,7 +23,6 @@ qsort_floats(floats* xs)
 {
     // TODO: call qsort to sort the array
     // see "man 3 qsort" for details
-    printf("sorting %ld\n", xs->size);
     qsort(xs->data, xs->size, sizeof(float), compar);
 }
 
@@ -31,7 +30,6 @@ floats*
 sample(float* data, long size, int P)
 {
     // TODO: sample the input data, per the algorithm decription
-    printf("sampling %d", P);
     int num = 3 * (P - 1);
     float samp[num];
     for(int i=0;i<num;i++) {
@@ -66,13 +64,11 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     float* lower = samps->data + pnum;
     float* upper = samps->data + pnum + 1;
 
-    printf("%d: l %f, up %f\n", pnum, *lower, *upper);
     for(long i = 0; i < size; ++i) {
         if(compar(&data[i], lower) >= 0 && compar(&data[i], upper) < 0) {
             floats_push(xs, data[i]);
         }
     }
-    puts("push done");
     // TODO: select the floats to be sorted by this worker
     printf("%d: start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
     // TODO: some other stuff
@@ -117,12 +113,10 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 void
 sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
 {
-    puts("hello");
     floats* samps = sample(data, size, P);
-    floats_print(samps);
     qsort_floats(samps);
 
-    floats_print(samps);
+    // floats_print(samps);
     run_sort_workers(data, size, P, samps, sizes, bb);
     free_floats(samps);
 }
@@ -164,7 +158,6 @@ main(int argc, char* argv[])
     // TODO: These should probably be from the input file.
     long count = *((long*)file);
     float* data = (float*)(file + sizeof(long));
-    printf("num is %ld, first %f\n", count, *data);
 
     long sizes_bytes = P * sizeof(long);
     long* sizes = mmap(0, sizes_bytes, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
